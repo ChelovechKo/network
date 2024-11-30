@@ -1,0 +1,23 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h4>All Posts</h4>
+    
+    <!-- Create New Post (if auth) -->
+    {% if user.is_authenticated %}
+        <div class="create-new-post-container border p-3">
+            <h4>New Post</h4>
+            <form id="new-post-form" action="{% url 'new_post' %}" method="POST">
+                {% csrf_token %}
+                <textarea id="description-form" name="description" class="form-control w-100" rows="5" required oninput="adjustHeight(this)"></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Post</button>
+            </form>
+        </div>
+    {% endif %}
+    
+    <!-- All Posts -->
+    <div id="posts-list"></div>
+    
+    <!-- Pagination Navigation -->
+    <!--<button id="load-more" class="btn btn-secondary mt-3">Load More</button>-->
+{% endblock %}

@@ -1,0 +1,68 @@
+@keyframes appearance {
+    0% {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+    }
+    100% {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+@keyframes hide {
+    0% {
+        opacity: 1;
+        max-height: 500px;
+    }
+    75% {
+        opacity: 0;
+        max-height: 500px;
+        overflow: hidden;
+    }
+    100% {
+        opacity: 0;
+        line-height: 0;
+        max-height: 0;
+        overflow: hidden;
+    }
+}
+
+.animate-hide {
+    animation-name: hide;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+}
+
+.body{
+    margin: 20px;
+}
+
+.form-control {
+    height: auto;
+    resize: vertical;
+    overflow: hidden;
+}
+
+.create-new-post-container {
+    margin-bottom: 20px;
+}
+
+.post-container{
+    background-color: #f9f9f9;
+}
+
+.new-post {
+    animation-name: appearance;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+    overflow: hidden;
+}
+
+.saveCancelButton{
+    display: none;
+}
+.editDeleteButton{
+    display: block;
+}
