@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             // Update Description
             const contentElement = document.createElement('span');
-            contentElement.className = 'post-description markdown-content';
+            contentElement.className = 'post-description';
             contentElement.setAttribute('data-raw-markdown', data.raw_description);
             contentElement.innerHTML = data.description;
             postElement.querySelector('textarea').replaceWith(contentElement);
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </small>
             ` : ''
             }
-            <span class="post-description markdown-content" data-raw-markdown="${post.raw_description}">${post.description}</span>
+            <span class="post-description" data-raw-markdown="${post.raw_description}">${post.description}</span>
             <span class="text-muted">${post.dt_created}</span>
             <small class="text-muted">Likes: ${post.likes_count}</small>
             <div class="saveCancelButton">
