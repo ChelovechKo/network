@@ -41,12 +41,13 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error deleting post:', error));
     }
 
-    function cancelEdit(postElement, oldDescription) {
+    function cancelEdit(postElement, rawMarkdown, oldDescription) {
         // Restore old content
         const textarea = postElement.querySelector('textarea');
         const newDescriptionContainer = document.createElement('span');
         newDescriptionContainer.className = 'post-description';
-        newDescriptionContainer.textContent = oldDescription;
+        newDescriptionContainer.setAttribute('data-raw-markdown', rawMarkdown);
+        newDescriptionContainer.innerHTML = oldDescription;
         textarea.replaceWith(newDescriptionContainer);
 
         // Hide Save и Cancel buttons
@@ -104,13 +105,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Save old Description
         const descriptionElement = postElement.querySelector('.post-description');
-        const oldContent = descriptionElement.textContent;
         const rawMarkdown = descriptionElement.getAttribute('data-raw-markdown');
+        const oldDescription = descriptionElement.innerHTML;
 
         // Replace on Textarea
         const textarea = document.createElement('textarea');
         textarea.className = 'form-control';
-        textarea.value = rawMarkdown || oldContent;
+        textarea.value = rawMarkdown;
         descriptionElement.replaceWith(textarea);
 
         // Automatically adjust height of textarea
@@ -125,8 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
             saveEdit(postElement, postId, textarea.value);
             currentEditablePost = null;
         };
+
         cancelButton.onclick = function () {
-            cancelEdit(postElement, oldContent);
+            cancelEdit(postElement, rawMarkdown, oldDescription);
             currentEditablePost = null;
         };
 
