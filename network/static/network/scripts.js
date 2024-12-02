@@ -112,6 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const textarea = document.createElement('textarea');
         textarea.className = 'form-control';
         textarea.value = rawMarkdown || oldDescription;
+        console.log("rawMarkdown:", rawMarkdown);
+        console.log("oldDescription:", oldDescription);
         descriptionElement.replaceWith(textarea);
 
         // Automatically adjust height of textarea
@@ -152,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </small>
             ` : ''
             }
-            <span class="post-description" data-raw-markdown="${post.raw_description}">${post.description}</span>
+            <span class="post-description" ${post.raw_description ? `data-raw-markdown="${post.raw_description}"` : ''}>${post.description}</span>
             <span class="text-muted">${post.dt_created}</span>
             <small class="text-muted">Likes: ${post.likes_count}</small>
             <div class="saveCancelButton">

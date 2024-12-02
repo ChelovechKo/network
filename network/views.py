@@ -15,7 +15,7 @@ def index(request):
         posts = Post.objects.all().order_by('-dt_created')
 
         # Pagination (10 in page)
-        paginator = Paginator(posts, 10)
+        paginator = Paginator(posts, 100)
         page_number = request.GET.get('page', 1) # get current page number
         page_obj = paginator.get_page(page_number) # get page with posts
 
