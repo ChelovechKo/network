@@ -78,8 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             // Update Description
             const contentElement = document.createElement('span');
-            contentElement.className = 'post-description';
-            contentElement.textContent = data.description;
+            contentElement.className = 'post-description markdown-content';
+            contentElement.setAttribute('data-raw-markdown', data.raw_description);
+            contentElement.innerHTML = data.description;
             postElement.querySelector('textarea').replaceWith(contentElement);
 
             // Hide Save и Cancel buttons
@@ -104,12 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save old Description
         const descriptionElement = postElement.querySelector('.post-description');
         const oldContent = descriptionElement.textContent;
+        const rawMarkdown = descriptionElement.getAttribute('data-raw-markdown');
 
         // Replace on Textarea
         const textarea = document.createElement('textarea');
         textarea.className = 'form-control';
-        textarea.value = descriptionElement.textContent;
+        textarea.value = rawMarkdown || oldContent;
         descriptionElement.replaceWith(textarea);
+
+        // Automatically adjust height of textarea
+        adjustHeight(textarea);
 
         // add function to button
         const saveCancelButton = postElement.querySelector('.saveCancelButton');
@@ -145,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </small>
             ` : ''
             }
-            <span class="post-description">${post.description}</span>
+            <span class="post-description markdown-content" data-raw-markdown="${post.raw_description}">${post.description}</span>
             <span class="text-muted">${post.dt_created}</span>
             <small class="text-muted">Likes: ${post.likes_count}</small>
             <div class="saveCancelButton">

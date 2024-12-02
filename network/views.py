@@ -9,7 +9,6 @@ import json
 
 from .models import User, Post, Subscription
 
-
 def index(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         # Get all posts
@@ -17,14 +16,14 @@ def index(request):
 
         # Pagination (10 in page)
         paginator = Paginator(posts, 10)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page', 1) # get current page number
+        page_obj = paginator.get_page(page_number) # get page with posts
 
         posts_data = [
             {
                 "id": post.id,
                 "user_created": post.user_created.username,
-                "description": post.description,
+                "description": post.get_html_description(),
                 "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
                 "likes_count": post.likes_count
             }
@@ -97,7 +96,7 @@ def new_post(request):
             return JsonResponse({
                 "id": post.id,
                 "user_created": post.user_created.username,
-                "description": post.description,
+                "description": post.get_html_description(),
                 "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
                 "likes_count": post.likes_count,
             })
@@ -114,7 +113,8 @@ def edit_post(request, post_id):
 
         return JsonResponse({
             "id": post.id,
-            "description": post.description,
+            "description": post.get_html_description(),
+            "raw_description": post.description,
             "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
             "likes_count": post.likes_count,
         })

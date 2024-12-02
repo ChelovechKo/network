@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.timezone import now
+from markdown import markdown
 
 
 class User(AbstractUser):
@@ -15,6 +16,9 @@ class Post(models.Model):
 
     def __str__(self):
         return f'Post {self.id} by {self.user_created}'
+
+    def get_html_description(self):
+        return markdown(self.description)
 
 
 class Subscription(models.Model):
