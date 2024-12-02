@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Replace on Textarea
         const textarea = document.createElement('textarea');
         textarea.className = 'form-control';
-        textarea.value = rawMarkdown;
+        textarea.value = rawMarkdown || oldDescription;
         descriptionElement.replaceWith(textarea);
 
         // Automatically adjust height of textarea
