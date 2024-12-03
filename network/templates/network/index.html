@@ -2,7 +2,7 @@
 
 {% block body %}
     <h4>All Posts</h4>
-    
+
     <!-- Create New Post (if auth) -->
     {% if user.is_authenticated %}
         <div class="create-new-post-container border p-3">
@@ -14,14 +14,14 @@
             </form>
         </div>
     {% endif %}
-    
+
     <!-- Pagination Navigation -->
     <nav aria-label="Page navigation" id="pagination-nav-top"></nav>
-    
+
     <!-- All Posts -->
-    <div id="posts-list"></div>
-    
+    <div id="posts-list" class="d-flex flex-column mx-auto w-50 w-md-50"></div>
+
     <!-- Pagination Navigation -->
     <nav aria-label="Page navigation" id="pagination-nav-bottom"></nav>
-    
+
 {% endblock %}

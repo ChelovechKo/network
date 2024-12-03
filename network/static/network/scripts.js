@@ -199,7 +199,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         postElement.className = `post-container border p-3 mb-3 d-flex flex-column ${isNew ? "new-post" : ""}`;
         postElement.innerHTML = `
-            <h3>${post.user_created}</h3>
+            <div class="post-header d-flex justify-content-between align-items-center">
+                <h3>${post.user_created}</h3>
+                <small class="text-muted">${post.dt_created}</small>
+            </div>
+            
             ${isCreator ? `
                 <small class="editDeleteButton">
                     <a href="#" class="text-primary edit-button">Edit</a> | 
@@ -207,8 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </small>
             ` : ''
             }
-            <span class="post-description" ${post.raw_description ? `data-raw-markdown="${post.raw_description}"` : ''}>${post.description}</span>
-            <span class="text-muted">${post.dt_created}</span>
+            <span class="post-description" ${post.raw_description ? `data-raw-markdown="${post.raw_description}"` : ''}>
+                ${post.description}
+            </span>            
             <small class="text-muted">Likes: ${post.likes_count}</small>
             <div class="saveCancelButton">
                 <button class="btn btn-primary btn-sm mt-2">Save</button>
