@@ -9,14 +9,6 @@ function adjustHeight(el) {
 document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
 
-    // Инициализация
-    /*
-    document.getElementById("load-more").onclick = function() {
-        currentPage++;
-        loadPosts();
-    };
-     */
-
     function deletePost(postElement, postId) {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -139,6 +131,63 @@ document.addEventListener('DOMContentLoaded', function() {
         editDeleteButton.style.display = 'none';
     }
 
+    // Pagination buttons handler
+    function addPaginationListeners() {
+        const paginationLinks = document.querySelectorAll('.page-link');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // switch-off standard behaviour
+                const page = this.dataset.page;
+                loadPosts(page);
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                });
+            }, 100);
+            });
+        });
+    }
+
+    // Update pagination
+    function updatePagination(paginationNavBottom, hasNext, currentPage) {
+        let paginationHTML = '';
+
+        // Button "Previous"
+        if (currentPage > 1) {
+            paginationHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>`;
+        }
+
+        // Current page
+        paginationHTML += `
+            <li class="page-item active">
+                <span class="page-link">${currentPage}</span>
+            </li>`;
+
+        // Button "Next"
+        if (hasNext) {
+            paginationHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${parseInt(currentPage) + 1}" aria-label="Next">
+                        <i class="bi bi-chevron-right"></i> <!-- Правая стрелка -->
+                    </a>
+                </li>`;
+        }
+
+        paginationNavBottom.innerHTML = `<ul class="pagination justify-content-center">${paginationHTML}</ul>`;
+        const paginationNavTop = document.getElementById("pagination-nav-top");
+        if (paginationNavTop) {
+            paginationNavTop.innerHTML = paginationNavBottom.innerHTML;
+        }
+
+        addPaginationListeners();
+    }
+
     // Post Rendering
     function renderPost(post, isNew = false) {
         const postElement = document.createElement("div");
@@ -184,25 +233,28 @@ document.addEventListener('DOMContentLoaded', function() {
         return postElement;
     }
 
-    // Load Posts
-    function loadPosts() {
+    // Load Posts and pagination
+    function loadPosts(page = 1) {
+        currentPage = page;
+
         fetch(`/?page=${currentPage}`, { headers: { "x-requested-with": "XMLHttpRequest" } })
             .then(response => response.json())
             .then(data => {
                 const postsList = document.getElementById("posts-list");
+                const paginationNav = document.getElementById("pagination-nav-bottom");
+
+                postsList.innerHTML = '';
+
                 data.posts.forEach(post => {
                     const postElement = renderPost(post);
                     postsList.append(postElement);
                 });
 
-                /*
-                if (!data.has_next) {
-                    document.getElementById("load-more").style.display = "none";
-                }
-                 */
+                updatePagination(paginationNav, data.has_next, currentPage);
             });
     }
 
+    // Initialization
     loadPosts();
 
     // If submit Create New Post
