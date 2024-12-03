@@ -111,6 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Automatically adjust height of textarea
         adjustHeight(textarea);
 
+        textarea.addEventListener('input', function () {
+            adjustHeight(textarea);
+        });
+
         // add function to button
         const saveCancelButton = postElement.querySelector('.saveCancelButton');
         saveCancelButton.style.display = 'block';
@@ -261,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("new-post-form").onsubmit = function(event) {
         event.preventDefault();
 
-        const description = document.getElementById("description-form").value;
+        const description = document.getElementById("description-form");
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
         fetch("/new_post", {
@@ -270,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-CSRFToken": csrfToken
             },
-            body: `description=${encodeURIComponent(description)}`
+            body: `description=${encodeURIComponent(description.value)}`
         })
         .then(response => response.json())
         .then(post => {
@@ -283,7 +287,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     postElement.classList.remove('new-post');
                 });
 
-            document.getElementById("description-form").value = "";
+            description.value = "";
+            description.style.height = "";
         })
         .catch(error => console.error("Error:", error));
     };
