@@ -10,15 +10,15 @@ import json
 from .models import User, Post, Subscription
 
 def index(request):
+    # Get all posts
+    posts = Post.objects.all().order_by('-dt_created')
+
+    # Pagination (10 in page)
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Get all posts
-        posts = Post.objects.all().order_by('-dt_created')
-
-        # Pagination (10 in page)
-        paginator = Paginator(posts, 100)
-        page_number = request.GET.get('page', 1) # get current page number
-        page_obj = paginator.get_page(page_number) # get page with posts
-
         posts_data = [
             {
                 "id": post.id,
@@ -31,7 +31,9 @@ def index(request):
         ]
         return JsonResponse({"posts": posts_data, "has_next": page_obj.has_next()}, safe=False)
 
-    return render(request, "network/index.html")
+    return render(request, "network/index.html", {
+        "page_obj": page_obj
+    })
 
 
 def login_view(request):

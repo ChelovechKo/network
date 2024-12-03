@@ -22,7 +22,6 @@
     }
     100% {
         opacity: 0;
-        line-height: 0;
         max-height: 0;
         overflow: hidden;
     }
