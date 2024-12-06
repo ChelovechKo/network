@@ -389,6 +389,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const pageHeader = document.getElementById("page-header");
     const createNewPost = document.getElementById("create-new-post");
     const userProfile = document.getElementById("user-profile");
+    const Following = document.getElementById("Following");
+    const newPostForm = document.getElementById("new-post-form");
 
     pageHeader.textContent = 'All Posts';
     createNewPost.style.display = 'block';
@@ -411,15 +413,19 @@ document.addEventListener('DOMContentLoaded', function() {
         userProfile.style.display = 'none';
         loadPosts(1, null)
     });
-    document.querySelector('#Following').addEventListener('click', () => {
-        pageHeader.textContent = 'Following';
-        createNewPost.style.display = 'none';
-        userProfile.style.display = 'none';
-        loadPosts(1, null, true)
-    });
+    if (Following) {
+        document.querySelector('#Following').addEventListener('click', () => {
+            pageHeader.textContent = 'Following';
+            createNewPost.style.display = 'none';
+            userProfile.style.display = 'none';
+            loadPosts(1, null, true)
+        })
+    }
 
     // Handles
-    document.getElementById("new-post-form").onsubmit = handleNewPost; // Create New Post
+    if(newPostForm){
+        document.getElementById("new-post-form").onsubmit = handleNewPost; // Create New Post
+    }
 
     loadPosts(1, null);
 });

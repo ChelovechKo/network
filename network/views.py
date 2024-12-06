@@ -29,6 +29,8 @@ def index(request, username=None):
     posts = Post.objects.all().order_by('-dt_created')  # All posts
     following = request.GET.get('following', 'false').lower() == 'true'
 
+    print("posts: ", posts)
+
     if username:
         profile_user = get_object_or_404(User, username=username)
         posts = Post.objects.filter(user_created=profile_user).order_by("-dt_created")  # User's posts
