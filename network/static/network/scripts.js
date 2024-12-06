@@ -1,8 +1,8 @@
 let currentEditablePost = null;
 let currentPage = 1;
 
+// Auto Change Height in form-control
 function adjustHeight(el) {
-    /* Auto Change Height in form-control */
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
 }
@@ -31,6 +31,44 @@ function toggleFollow(username) {
     .catch(error => console.error('Error:', error));
 }
 
+// Handle Like / Unlike
+function likeHandle(e){
+    const button = e.target;
+    const postId = e.target.dataset.postId;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    console.log("postId:", postId);
+
+    fetch(`/toggle_like/${postId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+            } else {
+                // Update button icon
+                 if (data.liked) {
+                    e.target.classList.remove('bi-heart');
+                    e.target.classList.add('bi-heart-fill');
+                } else {
+                    e.target.classList.remove('bi-heart-fill');
+                    e.target.classList.add('bi-heart');
+                }
+
+                // Update like count
+                const likeCountSpan = button.nextElementSibling;
+                likeCountSpan.textContent = `${data.likes_count}`;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// User Profile
 function loadUserProfile(username){
     const userProfile = document.getElementById("user-profile");
     fetch(`/${username}?page=1`, { headers: { "x-requested-with": "XMLHttpRequest" } })
@@ -39,7 +77,8 @@ function loadUserProfile(username){
             if (data.profile) {
                 userProfile.innerHTML = `
                     <hr>
-                    ${currentUser !== data.profile.profile_user ? `
+                    ${currentUser && currentUser !== "null" && currentUser !== data.profile.profile_user ? `
+                        
                         <button id="follow-btn" class="btn btn-${data.profile.is_following ? 'danger' : 'primary'} mb-3">
                             ${data.profile.is_following ? 'Unfollow' : 'Follow'}
                         </button>
@@ -85,8 +124,21 @@ function handleNewPost(event) {
     .then(post => {
         const postElement = renderPost(post, true);
         const postsList = document.getElementById("posts-list");
+
+        // Add the new post at the top
         postsList.prepend(postElement);
 
+        // Check if posts exceed 10 and handle pagination
+        if (postsList.childElementCount > 10) {
+            // Move the last post to the next page
+            const lastPost = postsList.lastElementChild;
+            postsList.removeChild(lastPost);
+
+            // Update pagination state
+            loadPosts(currentPage);
+        }
+
+        // Reset the new post form
         postElement.style.animationPlayState = 'running';
         postElement.addEventListener('animationend', () => {
             postElement.classList.remove('new-post');
@@ -98,6 +150,7 @@ function handleNewPost(event) {
     .catch(error => console.error("Error:", error));
 }
 
+// Delete Post
 function deletePost(postElement, postId) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -122,6 +175,7 @@ function deletePost(postElement, postId) {
     .catch(error => console.error('Error deleting post:', error));
 }
 
+// Cancel Edit
 function cancelEdit(postElement, rawMarkdown, oldDescription) {
     // Restore old content
     const textarea = postElement.querySelector('textarea');
@@ -140,6 +194,7 @@ function cancelEdit(postElement, rawMarkdown, oldDescription) {
     editDeleteButton.style.display = 'block';
 }
 
+// Save Edit
 function saveEdit(postElement, postId, newDescription) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -176,6 +231,7 @@ function saveEdit(postElement, postId, newDescription) {
     .catch(error => console.error('Error updating post:', error));
 }
 
+// Enable Edit
 function enableEdit(postElement, postId) {
     // Check. In one moment we can edit one post
     if (currentEditablePost && currentEditablePost !== postElement) {
@@ -317,7 +373,10 @@ function renderPost(post, isNew = false) {
         <span class="post-description" ${post.raw_description ? `data-raw-markdown="${post.raw_description}"` : ''}>
             ${post.description}
         </span>            
-        <small class="text-muted">Likes: ${post.likes_count}</small>
+        <div>
+            <i class="bi ${post.liked_by_current_user ? 'bi-heart-fill' : 'bi-heart'} icon-heart" data-post-id="${post.id}"></i>
+            <small class="text-muted ms-2">${post.likes_count}</small>
+        </div>
         <div class="saveCancelButton">
             <button class="btn btn-primary btn-sm mt-2">Save</button>
             <button class="btn btn-secondary btn-sm mt-2">Cancel</button>
@@ -396,23 +455,13 @@ document.addEventListener('DOMContentLoaded', function() {
     createNewPost.style.display = 'block';
     userProfile.style.display = 'none';
 
-    // if click on username. Load only User's post
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('user-profile')) {
-            e.preventDefault();
-            const username = e.target.getAttribute('href').substring(1);
-            pageHeader.textContent = username;
-            createNewPost.style.display = 'none';
-            loadUserProfile(username);
-        }
-    });
-
     document.querySelector('#AllPosts').addEventListener('click', () => {
         pageHeader.textContent = 'All Posts';
         createNewPost.style.display = 'block';
         userProfile.style.display = 'none';
         loadPosts(1, null)
     });
+
     if (Following) {
         document.querySelector('#Following').addEventListener('click', () => {
             pageHeader.textContent = 'Following';
@@ -426,6 +475,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if(newPostForm){
         document.getElementById("new-post-form").onsubmit = handleNewPost; // Create New Post
     }
+    // if click on username + Like/unlike
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('user-profile')) {
+            e.preventDefault();
+            const username = e.target.getAttribute('href').substring(1);
+            pageHeader.textContent = username;
+            createNewPost.style.display = 'none';
+            loadUserProfile(username);
+        }
+        else if(e.target.classList.contains('icon-heart')) {
+            likeHandle(e);
+        }
+    });
 
     loadPosts(1, null);
 });

@@ -65,3 +65,14 @@
 .editDeleteButton{
     display: block;
 }
+
+.icon-heart{
+    color: dodgerblue;
+    cursor: pointer;
+}
+
+.icon-heart:hover{
+    transform: scale(1.5);
+    cursor: pointer;
+    text-shadow: 0 0 10px deepskyblue, 0 0 20px deepskyblue, 0 0 30px deepskyblue;
+}

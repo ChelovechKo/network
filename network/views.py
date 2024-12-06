@@ -7,16 +7,20 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 import json
 
-from .models import User, Post, Subscription
+from .models import User, Post, Subscription, Like
 
-def format_posts(posts):
+def format_posts(posts, current_user):
     return [
         {
             "id": post.id,
             "user_created": post.user_created.username,
             "description": post.get_html_description(),
             "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
-            "likes_count": post.likes_count
+            "likes_count": post.likes_count,
+            "liked_by_current_user": (
+                    current_user.is_authenticated and
+                    post.likes.filter(user=current_user).exists()
+            )
         }
         for post in posts
     ]
@@ -28,8 +32,6 @@ def index(request, username=None):
     profile_data = None
     posts = Post.objects.all().order_by('-dt_created')  # All posts
     following = request.GET.get('following', 'false').lower() == 'true'
-
-    print("posts: ", posts)
 
     if username:
         profile_user = get_object_or_404(User, username=username)
@@ -58,7 +60,7 @@ def index(request, username=None):
 
     # AJAX response
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        posts_data = format_posts(page_obj)
+        posts_data = format_posts(page_obj, request.user)
         return JsonResponse({
             "profile": profile_data,
             "posts": posts_data,
@@ -185,4 +187,28 @@ def toggle_follow(request, username):
         "is_following": is_following,
         "following_count": user_to_follow.following.count(),
         "followers_count": user_to_follow.followers.count(),
+    })
+
+@login_required
+def toggle_like(request, post_id):
+    """ like/unlike for a post"""
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    liked = False
+
+    like, created = Like.objects.get_or_create(user=user, post=post)
+
+    if not created:
+        like.delete() # If the like already exists, remove it (unlike)
+        liked = False
+    else:
+        liked = True # Otherwise, the user has liked the post
+
+    # Update the like count on the post
+    post.likes_count = post.likes.count()
+    post.save()
+
+    return JsonResponse({
+        'liked': liked,
+        'likes_count': post.likes_count
     })

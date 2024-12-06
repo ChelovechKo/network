@@ -28,22 +28,6 @@
 
     <!-- All Posts -->
     <div id="posts-list" class="d-flex flex-column mx-auto w-75">
-        {% for post in page_obj %}
-            <div class="post-container" data-post-id="{{ post.id }}">
-                <div class="post-header d-flex justify-content-between align-items-center">
-                    <h3><a href="/{{ post.user_created.username }}" class="user-profile text-decoration-none text-dark">
-                        {{ post.user_created.username }}
-                    </a></h3>
-                    <small class="text-muted">{{ post.dt_created|date:"F d, Y, h:i A" }}</small>
-                </div>
-                <span class="post-description">
-                    {{ post.description|safe }}
-                </span>
-                <small class="text-muted">Likes: {{ post.likes_count }}</small>
-            </div>
-        {% empty %}
-            <div class="text-center mt-3">No posts to display.</div>
-        {% endfor %}
     </div>
     
     <!-- Message for no posts -->
@@ -53,21 +37,6 @@
 
     <!-- Pagination Navigation -->
     <nav aria-label="Page navigation" id="pagination-nav-bottom">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
-            {% endif %}
-            <li class="page-item active">
-                <span class="page-link">{{ page_obj.number }}</span>
-            </li>
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                </li>
-            {% endif %}
-        </ul>
     </nav>
 
 {% endblock %}
