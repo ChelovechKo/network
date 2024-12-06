@@ -2,39 +2,72 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.core.paginator import Paginator
 import json
 
 from .models import User, Post, Subscription
 
-def index(request):
-    # Get all posts
-    posts = Post.objects.all().order_by('-dt_created')
+def format_posts(posts):
+    return [
+        {
+            "id": post.id,
+            "user_created": post.user_created.username,
+            "description": post.get_html_description(),
+            "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
+            "likes_count": post.likes_count
+        }
+        for post in posts
+    ]
+
+def index(request, username=None):
+    # Default values
+    is_following = False
+    profile_user = None
+    profile_data = None
+    posts = Post.objects.all().order_by('-dt_created')  # All posts
+    following = request.GET.get('following', 'false').lower() == 'true'
+
+    if username:
+        profile_user = get_object_or_404(User, username=username)
+        posts = Post.objects.filter(user_created=profile_user).order_by("-dt_created")  # User's posts
+        # Follow status
+        if request.user.is_authenticated:
+            is_following = Subscription.objects.filter(user_follower=request.user, following_user=profile_user).exists()
+    elif following and request.user.is_authenticated:
+        following_users = request.user.following.values_list('following_user', flat=True)
+        posts = Post.objects.filter(user_created__in=following_users).order_by("-dt_created")
+
+    # Profile data
+    if profile_user:
+        profile_data = {
+            "profile_user": profile_user.username if profile_user else None,
+            "profile_id": profile_user.id if profile_user else None,
+            "following_count": profile_user.following.count() if profile_user else 0,
+            "followers_count": profile_user.followers.count() if profile_user else 0,
+            "is_following": is_following,
+        }
 
     # Pagination (10 in page)
-    paginator = Paginator(posts, 10)
     page_number = request.GET.get('page', 1)
+    paginator = Paginator(posts, 10)
     page_obj = paginator.get_page(page_number)
 
+    # AJAX response
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        posts_data = [
-            {
-                "id": post.id,
-                "user_created": post.user_created.username,
-                "description": post.get_html_description(),
-                "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
-                "likes_count": post.likes_count
-            }
-            for post in page_obj
-        ]
-        return JsonResponse({"posts": posts_data, "has_next": page_obj.has_next()}, safe=False)
+        posts_data = format_posts(page_obj)
+        return JsonResponse({
+            "profile": profile_data,
+            "posts": posts_data,
+            "has_next": page_obj.has_next()
+        }, safe=False)
 
     return render(request, "network/index.html", {
-        "page_obj": page_obj
+        "page_obj": page_obj,
+        "profile_data": profile_data,
+        "following": following,
     })
-
 
 def login_view(request):
     if request.method == "POST":
@@ -128,3 +161,25 @@ def delete_post(request, post_id):
         post = Post.objects.get(id=post_id, user_created=request.user)
         post.delete()
         return JsonResponse({"message": "Post deleted successfully"})
+
+
+@login_required
+def toggle_follow(request, username):
+    '''Change Follow/Unfollow '''
+    user_to_follow = get_object_or_404(User, username=username)
+
+    subscription, created = Subscription.objects.get_or_create(
+        user_follower=request.user, following_user=user_to_follow
+    )
+
+    if not created:
+        subscription.delete()
+        is_following = False
+    else:
+        is_following = True
+
+    return JsonResponse({
+        "is_following": is_following,
+        "following_count": user_to_follow.following.count(),
+        "followers_count": user_to_follow.followers.count(),
+    })

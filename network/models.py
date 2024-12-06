@@ -22,8 +22,8 @@ class Post(models.Model):
 
 
 class Subscription(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
-    user_follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")
+    following_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")
+    user_follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
 
     def __str__(self):
-        return f'{self.user_follower.username} follows {self.user_id.username}'
+        return f'{self.user_follower.username} follows {self.following_user.username}'

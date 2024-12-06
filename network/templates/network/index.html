@@ -1,25 +1,38 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h4>All Posts</h4>
-
-    <!-- Create New Post (if auth) -->
-    {% if user.is_authenticated %}
-        <div class="create-new-post-container border p-3">
-            <h4>New Post</h4>
-            <form id="new-post-form" action="{% url 'new_post' %}" method="POST">
-                {% csrf_token %}
-                <textarea id="description-form" name="description" class="form-control w-100" rows="5" required oninput="adjustHeight(this)"></textarea>
-                <button type="submit" class="btn btn-primary mt-2">Post</button>
-            </form>
-        </div>
-    {% endif %}
+    <h1 id="page-header"></h1>
+    
+    <div id="create-new-post">
+        <hr>
+        <!-- Create New Post (if auth) -->
+        {% if user.is_authenticated %}
+            <div class="create-new-post-container p-3">
+                <h4>New Post</h4>
+                <form id="new-post-form" action="{% url 'new_post' %}" method="POST">
+                    {% csrf_token %}
+                    <textarea id="description-form" name="description" class="form-control w-100" rows="5" required oninput="adjustHeight(this)"></textarea>
+                    <button type="submit" class="btn btn-primary mt-2">Post</button>
+                </form>
+            </div>
+        {% endif %}
+        <hr>
+    </div>
+    
+    <!-- User Profile -->
+    <div id="user-profile">
+    </div>
 
     <!-- Pagination Navigation -->
     <nav aria-label="Page navigation" id="pagination-nav-top"></nav>
 
     <!-- All Posts -->
-    <div id="posts-list" class="d-flex flex-column mx-auto w-50 w-md-50"></div>
+    <div id="posts-list" class="d-flex flex-column mx-auto w-75"></div>
+    
+    <!-- Message for no posts -->
+    <div id="no-posts-message" class="text-center mt-3" style="display: none;">
+        No posts to display.
+    </div>
 
     <!-- Pagination Navigation -->
     <nav aria-label="Page navigation" id="pagination-nav-bottom"></nav>
