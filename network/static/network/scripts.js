@@ -83,7 +83,7 @@ function handleNewPost(event) {
     })
     .then(response => response.json())
     .then(post => {
-        const postElement = renderPost(null, post, true);
+        const postElement = renderPost(post, true);
         const postsList = document.getElementById("posts-list");
         postsList.prepend(postElement);
 
@@ -292,6 +292,8 @@ function updatePagination(paginationNavBottom, hasNext, currentPage, totalPosts)
 function renderPost(post, isNew = false) {
     const postElement = document.createElement("div");
     const isCreator = post.user_created === currentUser;
+
+
 
     if (!post || !post.id || !post.user_created) {
         console.error("Invalid post data passed to renderPost:", post);

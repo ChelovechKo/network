@@ -127,6 +127,7 @@ def new_post(request):
         description = request.POST.get("description")
         if description:
             post = Post.objects.create(user_created=request.user, description=description)
+
             post.save()
             return JsonResponse({
                 "id": post.id,
