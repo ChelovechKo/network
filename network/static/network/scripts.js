@@ -445,9 +445,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const Following = document.getElementById("Following");
     const newPostForm = document.getElementById("new-post-form");
 
-    pageHeader.textContent = 'All Posts';
-    createNewPost.style.display = 'block';
-    userProfile.style.display = 'none';
+    if (pageHeader) {
+        pageHeader.textContent = 'All Posts';
+    }
+
+    if (createNewPost) {
+        createNewPost.style.display = 'block';
+    }
+
+    if (userProfile) {
+        userProfile.style.display = 'none';
+    }
 
     document.querySelector('#AllPosts').addEventListener('click', () => {
         pageHeader.textContent = 'All Posts';
@@ -483,5 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    loadPosts(1, null);
+    if (pageHeader) {
+        loadPosts(1, null);
+    }
 });

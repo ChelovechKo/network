@@ -15,6 +15,7 @@ def format_posts(posts, current_user):
             "id": post.id,
             "user_created": post.user_created.username,
             "description": post.get_html_description(),
+            "raw_description": post.description,
             "dt_created": post.dt_created.strftime("%B %d, %Y, %I:%M %p"),
             "likes_count": post.likes_count,
             "liked_by_current_user": (
