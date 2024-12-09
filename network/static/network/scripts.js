@@ -37,8 +37,6 @@ function likeHandle(e){
     const postId = e.target.dataset.postId;
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    console.log("postId:", postId);
-
     fetch(`/toggle_like/${postId}`, {
         method: 'POST',
         headers: {
@@ -133,9 +131,6 @@ function handleNewPost(event) {
             // Move the last post to the next page
             const lastPost = postsList.lastElementChild;
             postsList.removeChild(lastPost);
-
-            // Update pagination state
-            loadPosts(currentPage);
         }
 
         // Reset the new post form
@@ -170,6 +165,7 @@ function deletePost(postElement, postId) {
         postElement.classList.add('animate-hide');
         postElement.addEventListener('animationend', () => {
             postElement.remove();
+            loadPosts(currentPage);
         });
     })
     .catch(error => console.error('Error deleting post:', error));
@@ -348,8 +344,6 @@ function updatePagination(paginationNavBottom, hasNext, currentPage, totalPosts)
 function renderPost(post, isNew = false) {
     const postElement = document.createElement("div");
     const isCreator = post.user_created === currentUser;
-
-
 
     if (!post || !post.id || !post.user_created) {
         console.error("Invalid post data passed to renderPost:", post);
